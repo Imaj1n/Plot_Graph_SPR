@@ -293,7 +293,7 @@ ymin_right, ymax_right = st.sidebar.slider("Y kanan (eksperimen)", 0.0, 1.5, (0.
 zoom_xmin, zoom_xmax = st.sidebar.slider("x zoom", 30.0, 70.0, (43.5, 45.5), 0.05)
 zoom_ymin, zoom_ymax = st.sidebar.slider("y zoom", 0.0, 1.0, (0.01, 0.75), 0.01)
 
-st.title("Visualisasi SPR: Fit vs Eksperimen (High DPI + Legend)")
+st.title("Visualisasi Perbandingan Kurva SPR")
 
 fit_curves, exp_curves = [], []
 colors = plt.rcParams['axes.prop_cycle'].by_key().get('color', [])
