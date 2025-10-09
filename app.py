@@ -322,7 +322,7 @@ if exp_files:
 
 # =============== Plotting (High DPI + Text Label only) ===============
 
-fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(18, 7), dpi=180)
+fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(18, 7), dpi=300)
 plt.style.use('seaborn-v0_8-whitegrid')
 
 # Panel kiri (teori)
