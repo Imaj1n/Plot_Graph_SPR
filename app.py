@@ -191,10 +191,6 @@
 #         st.info("Belum ada kurva eksperimen.")
 
 
-# app_streamlit_spr.py
-# -------------------------------------------------------------
-# Versi revisi: hanya menambahkan teks label (tanpa label legend), high DPI.
-# -------------------------------------------------------------
 
 import io
 import numpy as np
@@ -297,7 +293,7 @@ ymin_right, ymax_right = st.sidebar.slider("Y kanan (eksperimen)", 0.0, 1.5, (0.
 zoom_xmin, zoom_xmax = st.sidebar.slider("x zoom", 30.0, 70.0, (43.5, 45.5), 0.05)
 zoom_ymin, zoom_ymax = st.sidebar.slider("y zoom", 0.0, 1.0, (0.01, 0.75), 0.01)
 
-st.title("Visualisasi SPR: Fit vs Eksperimen (High DPI + Minima Markers)")
+st.title("Visualisasi SPR: Fit vs Eksperimen (High DPI + Legend)")
 
 fit_curves, exp_curves = [], []
 colors = plt.rcParams['axes.prop_cycle'].by_key().get('color', [])
@@ -320,61 +316,56 @@ if exp_files:
                 y = smooth_savgol(y, window_length=window_len, polyorder=poly_order)
             exp_curves.append({"label": f.name, "x": x, "y": y, "color": colors[j % len(colors)]})
 
-# =============== Plotting (High DPI + Text Label only) ===============
+# =============== Plotting ===============
 
-fig, (ax_right, ax_left) = plt.subplots(1, 2, figsize=(18, 7), dpi=500)
+fig, (ax_left,ax_right) = plt.subplots(1, 2, figsize=(18, 7), dpi=500)
 plt.style.use('seaborn-v0_8-whitegrid')
+
+# Panel kanan (eksperimen)
+for c in exp_curves:
+    ax_right.plot(c["x"], c["y"], linewidth=2.0, color=c["color"], label=c["label"])
+
+ax_right.set_title("Grafik Data Pengukuran SPR")
+ax_right.set_xlabel("θᵢ (°)")
+ax_right.set_ylabel("Rasio Tegangan Sensor")
+ax_right.set_xlim(xmin, xmax)
+ax_right.set_ylim(ymin_right, ymax_right)
+ax_right.grid(True, linestyle='--', linewidth=0.5)
+ax_right.legend(fontsize=8, loc='best')
 
 # Panel kiri (teori)
 for c in fit_curves:
-    ax_left.plot(c["x"], c["y"], linewidth=2.2, color=c["color"])  # tanpa label legend
+    ax_left.plot(c["x"], c["y"], linewidth=2.2, color=c["color"], label=c["label"])
 
-ax_left.set_title("Kurva Teori/Fit SPR")
+ax_left.set_title("Grafik Fitting Reflektansi SPR")
 ax_left.set_xlabel("θᵢ (°)")
-ax_left.set_ylabel("Rasio Tegangan (teori)")
+ax_left.set_ylabel("Rasio Tegangan Sensor")
 ax_left.set_xlim(xmin, xmax)
 ax_left.set_ylim(ymin_left, ymax_left)
 ax_left.grid(True, linestyle='--', linewidth=0.5)
+ax_left.legend(fontsize=8, loc='best')
 
-# Inset zoom kiri — tambah garis vertikal putus-putus + legenda derajat
+# Inset zoom kiri (menampilkan garis vertikal + derajat)
 inset = ax_left.inset_axes([0.60, 0.08, 0.38, 0.44])
-
-minima_lines = []
-minima_labels = []
+minima_lines, minima_labels = [], []
 for c in fit_curves:
-    inset.plot(c["x"], c["y"], linewidth=1.8, color=c["color"])  # plot kurva
-    xm, ym = argmin_xy(c["x"], c["y"])  # posisi minima
-    # garis vertikal putus-putus di posisi minima
+    inset.plot(c["x"], c["y"], linewidth=1.8, color=c["color"])
+    xm, ym = argmin_xy(c["x"], c["y"])
     line = inset.vlines(xm, zoom_ymin, zoom_ymax, color=c["color"], linestyle='--', linewidth=1.2)
     minima_lines.append(line)
     minima_labels.append(f"{xm:.2f}°")
-    # beri anotasi kecil di dekat titik minima
     inset.scatter([xm], [ym], s=18, color=c["color"])
     inset.text(xm + 0.02, ym + 0.02, f"{xm:.2f}°", fontsize=7, color=c["color"], ha='left', va='bottom')
 
-# Set rentang zoom
 inset.set_xlim(zoom_xmin, zoom_xmax)
 inset.set_ylim(zoom_ymin, zoom_ymax)
 inset.grid(True, linestyle=':')
-
-# legenda ringan berisi hanya angka derajat (tanpa nama kurva)
 try:
     inset.legend(minima_lines, minima_labels, loc='upper right', fontsize=8, frameon=False)
 except Exception:
     pass
 
 ax_left.indicate_inset_zoom(inset, edgecolor="black")
-
-# Panel kanan (eksperimen) — hanya kurva + tanpa legend; tidak ada label samping
-for c in exp_curves:
-    ax_right.plot(c["x"], c["y"], linewidth=2.0, color=c["color"])  
-
-ax_right.set_title("Kurva Eksperimen SPR")
-ax_right.set_xlabel("θᵢ (°)")
-ax_right.set_ylabel("Rasio Tegangan (norm.)")
-ax_right.set_xlim(xmin, xmax)
-ax_right.set_ylim(ymin_right, ymax_right)
-ax_right.grid(True, linestyle='--', linewidth=0.5)
 
 plt.tight_layout()
 st.pyplot(fig)
