@@ -370,6 +370,19 @@ ax_left.indicate_inset_zoom(inset, edgecolor="black")
 plt.tight_layout()
 st.pyplot(fig)
 
+
+buf = io.BytesIO()
+fig.savefig(buf, format="png", dpi=800)
+buf.seek(0)
+
+# Tombol download gambar
+st.download_button(
+    label="Download High DPI Image",
+    data=buf,
+    file_name="plot_high_dpi.png",
+    mime="image/png"
+)
+
 # =============== Analitik Minima ===============
 
 st.subheader("Analitik Minima")
